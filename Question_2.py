@@ -10,13 +10,9 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-    # Add the custom --config flag with a required parameter
 parser.add_argument('--config', required=True)
 parser.add_argument('--control_algo' ,required = True)
 parser.add_argument('--link_loss', required = True)
-
-# Add other command-line arguments as needed
-# parser.add_argument('--other_flag', help='Description of other flag', type=int)
 
 args = parser.parse_args()
 
