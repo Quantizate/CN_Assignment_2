@@ -6,6 +6,7 @@ from mininet.net import Mininet
 from mininet.node import Node
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
+from mininet.link import TCLink
 
 
 class LinuxRouter( Node ):
@@ -49,21 +50,27 @@ class NetworkTopo( Topo ):
                      intfName1='ra-eth1',
                      intfName2='rb-eth1',
                      params1={'ip': '10.0.50.1/24'},
-                     params2={'ip': '10.0.50.2/24'})
+                     params2={'ip': '10.0.50.2/24'},
+                     bw=100,
+                     delay='5ms')
         
         self.addLink(router2,
                      router3,
                      intfName1='rb-eth2',
                      intfName2='rc-eth1',
                      params1={'ip': '10.0.100.1/24'},
-                     params2={'ip': '10.0.100.2/24'})
+                     params2={'ip': '10.0.100.2/24'},
+                     bw=100,
+                     delay='5ms')
         
         self.addLink(router1,
                      router3,
                      intfName1='ra-eth2',
                      intfName2='rc-eth2',
                      params1={'ip': '10.0.150.1/24'},
-                     params2={'ip': '10.0.150.2/24'})
+                     params2={'ip': '10.0.150.2/24'},
+                     bw=100,
+                     delay='5ms')
 
         # Adding hosts with the definition of their default routes
 
@@ -102,21 +109,24 @@ class NetworkTopo( Topo ):
 def run():
     "Test linux router"
     topo = NetworkTopo()
-    net = Mininet( topo=topo, waitConnected=True) 
+    net = Mininet( topo=topo, waitConnected=True, link=TCLink) 
 
-    print(info(net['ra'].cmd("ip route add 10.100.0.0/24 via 10.0.50.2 dev ra-eth1")))
-    print(info(net['ra'].cmd("ip route add 10.200.0.0/24 via 10.0.150.2 dev ra-eth2")))
+    net['ra'].cmd("ip route add 10.100.0.0/24 via 10.0.50.2 dev ra-eth1")
+    net['ra'].cmd("ip route add 10.200.0.0/24 via 10.0.150.2 dev ra-eth2")
 
-    print(info(net['rb'].cmd("ip route add 10.0.0.0/24 via 10.0.50.1 dev rb-eth1")))
-    print(info(net['rb'].cmd("ip route add 10.200.0.0/24 via 10.0.100.2 dev rb-eth2")))
+    net['rb'].cmd("ip route add 10.0.0.0/24 via 10.0.50.1 dev rb-eth1")
+    net['rb'].cmd("ip route add 10.200.0.0/24 via 10.0.100.2 dev rb-eth2")
 
-    print(info(net['rc'].cmd("ip route add 10.100.0.0/24 via 10.0.100.1 dev rc-eth1")))
-    print(info(net['rc'].cmd("ip route add 10.0.0.0/24 via 10.0.150.1 dev rc-eth2")))
+    net['rc'].cmd("ip route add 10.100.0.0/24 via 10.0.100.1 dev rc-eth1")
+    net['rc'].cmd("ip route add 10.0.0.0/24 via 10.0.150.1 dev rc-eth2")
+
     net.start()
-    info( '*** Routing Table on Router:\n' )
-    info(net[ 'ra' ].cmd( 'route' ))
-    info(net[ 'rb' ].cmd( 'route' ))
-    info( net[ 'rc' ].cmd( 'route' ) )
+    ''' For debugging purposes
+    # info( '*** Routing Table on Router:\n' )
+    # info(net[ 'ra' ].cmd( 'route' ))
+    # info(net[ 'rb' ].cmd( 'route' ))
+    # info( net[ 'rc' ].cmd( 'route' ) )
+    '''
     CLI( net )
     net.stop()
 
